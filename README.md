@@ -1,4 +1,4 @@
-# Fundamentals of Data Science - Final Project: Classification of Fake and Real Faces
+# FDS - Final Project: Classification of Fake and Real Faces
 
 This repository contains our group's final project in the *Fundamentals of Data Science and Laboratory* course for the master's degree in Data Science at Sapienza (2024/2025).
 
