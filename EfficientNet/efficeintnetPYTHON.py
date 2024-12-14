@@ -57,12 +57,12 @@ dataset_path = "../../dataset/extracted_files/"  # Updated path, one folder out,
 train_df = pd.read_csv(dataset_path + "train.csv", index_col=0)
 test_df = pd.read_csv(dataset_path +"test.csv", index_col=0)
 valid_df = pd.read_csv(dataset_path +"valid.csv", index_col=0)
-print('Train Dataset Paths and Labels')
-display(train_df.head())
-print('Test Dataset Paths and Labels')
-display(test_df.head())
-print('Validation Dataset Paths and Labels')
-display(valid_df.head())
+# print('Train Dataset Paths and Labels')
+# display(train_df.head())
+# print('Test Dataset Paths and Labels')
+# display(test_df.head())
+# print('Validation Dataset Paths and Labels')
+# display(valid_df.head())
 
 # Base directory where images are stored
 base_img_dir = '../../dataset/extracted_files/real_vs_fake/real-vs-fake/'
