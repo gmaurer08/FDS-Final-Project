@@ -1,7 +1,3 @@
-%pip install opencv-python matplotlib Pillow torch torchvision torchcam
-%pip install tabulate
-%pip install grad-cam
-
 import pandas as pd
 import os
 import numpy as np
@@ -292,7 +288,7 @@ def train_model(model, train_loader, valid_loader, test_loader, loss_function, o
 
                 # Forward pass
                 outputs = model(images)
-                loss = criterion(outputs, labels)
+                #loss = criterion(outputs, labels)
 
                 # Compute loss
                 if loss_function == 'BCEWithLogitsLoss':
@@ -304,7 +300,7 @@ def train_model(model, train_loader, valid_loader, test_loader, loss_function, o
                 valid_running_loss += val_loss.item()
                 
                 val_preds = torch.max(outputs, 1)[1]
-                valid_correct += torch.sum(preds == labels.data)
+                valid_correct += (val_preds == labels).sum().item()
                 valid_total += labels.size(0)
 
                 # Memorize true and predicted labels for explainability
@@ -315,7 +311,7 @@ def train_model(model, train_loader, valid_loader, test_loader, loss_function, o
                 prob.extend(torch.softmax(outputs, dim=1)[:, 1].cpu().detach().numpy())
 
         epoch_valid_loss = valid_running_loss / len(valid_loader)
-        epoch_valid_acc = valid_correct.double() / valid_total
+        epoch_valid_acc = valid_correct / valid_total
         val_losses.append(epoch_valid_loss)  # Save validation loss for this epoch
         val_accuracies.append(epoch_valid_acc)  # Save validation accuracy for this epoch
 
