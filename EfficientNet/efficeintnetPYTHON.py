@@ -656,7 +656,9 @@ def train_model(model, train_loader, valid_loader, test_loader, loss_function, o
 #train_result = train_model(model, train_loader, valid_loader, num_epochs=3, start_epoch=start_epoch, checkpoint_path='checkpoint.pth')
 #display(train_result)
 
-# Create a copy of resnet50
+os.makedirs('checkpoints', exist_ok=True)
+os.makedirs('efficientnet_result', exist_ok=True)
+# Create a copy of efficientNet
 efficientnet_BCE_Adam_001 = copy.deepcopy(model)
 efficientnet_BCE_Adam_001, results_BCE_Adam_001 = train_model(efficientnet_BCE_Adam_001, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'Adam', lr = 0.001, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_BCE_Adam_001.pth', result_path='efficientnet_result/result_BCE_Adam_001.pth')
 
@@ -667,28 +669,28 @@ efficientnet_BCE_Adam_001, results_BCE_Adam_001 = train_model(efficientnet_BCE_A
 # BCE_Adam_001_paths = ['efficientnet_result/BCE_Adam_001_loss.png', 'efficientnet_result/BCE_Adam_001_acc.png', 'efficientnet_result/BCE_Adam_001_ROC.png', 'efficientnet_result/BCE_Adam_001_PR', 'efficientnet_result/BCE_Adam_001_conf_val.png', 'efficientnet_result/BCE_Adam_001_conf_test.png']
 # plot_figures(results_BCE_Adam_001, BCE_Adam_001_paths, 5)
 
-# Create a copy of resnet50
+# Create a copy of efficientNet
 efficientnet_CE_Adam_01 = copy.deepcopy(model)
-efficientnet_CE_Adam_01, results_CE_Adam_01 = train_model(efficientnet_CE_Adam_01, train_loader, valid_loader, test_loader, loss_function = 'CrossEntropyLoss', optimizer = 'Adam', lr = 0.01, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoint_CE_Adam_01.pth', result_path='efficientnet_result/result_CE_Adam_01.pth')
+efficientnet_CE_Adam_01, results_CE_Adam_01 = train_model(efficientnet_CE_Adam_01, train_loader, valid_loader, test_loader, loss_function = 'CrossEntropyLoss', optimizer = 'Adam', lr = 0.01, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_CE_Adam_01.pth', result_path='efficientnet_result/result_CE_Adam_01.pth')
 
 #plot_figures(results_CE_Adam_01, 'efficientnet_result/CE_Adam_01.png', 5)
 
 # Create copy of efficientnet
 efficientnet_BCE_SGD_001 = copy.deepcopy(model)
-efficientne_BCE_SGD_001, results_BCE_SGD_001 = train_dataset(efficientnet_BCE_SGD_001, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'SGD', lr = 0.001, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoint_BCE_SGD_001.pth', result_path='efficientnet_result/result_BCE_SGD_001.pth')
+efficientne_BCE_SGD_001, results_BCE_SGD_001 = train_model(efficientnet_BCE_SGD_001, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'SGD', lr = 0.001, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_BCE_SGD_001.pth', result_path='efficientnet_result/result_BCE_SGD_001.pth')
 
-# Create copy of efficientnet
-efficientnet_BCE_Adam_001 = copy.deepcopy(model)
-efficientne_BCE_Adam_001, results_BCE_Adam_001 = train_dataset(efficientnet_BCE_Adam_001, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'Adam', lr = 0.001, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoint_BCE_Adam_001.pth', result_path='efficientnet_result/result_BCE_Adam_001.pth')
+# Create copy of efficientnet   DOESNT EXIST IN RESNET50
+efficientnet_BCE_Adam_01 = copy.deepcopy(model)
+efficientne_BCE_Adam_01, results_BCE_Adam_01 = train_model(efficientnet_BCE_Adam_01, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'Adam', lr = 0.001, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_BCE_Adam_01.pth', result_path='efficientnet_result/result_BCE_Adam_01.pth')
 
 # Create copy of efficientnet
 efficientnet_BCE_Adam_001_wd = copy.deepcopy(model)
-efficientnet_BCE_Adam_001_wd, results_BCE_Adam_001_wd = train_dataset(efficientnet_BCE_Adam_001_wd, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'Adam', lr = 0.001, weight_decay = 0.001, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoint_BCE_Adam_001_wd.pth', result_path='efficientnet_result/result_BCE_Adam_001_wd.pth')
+efficientnet_BCE_Adam_001_wd, results_BCE_Adam_001_wd = train_model(efficientnet_BCE_Adam_001_wd, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'Adam', lr = 0.001, weight_decay = 0.001, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_BCE_Adam_001_wd.pth', result_path='efficientnet_result/result_BCE_Adam_001_wd.pth')
 
 # Create copy of efficientnet
 efficientnet_CE_SDG_001_mom = copy.deepcopy(model)
-efficientnet_CE_SDG_001_mom, results_CE_SDG_001_mom = train_dataset(efficientnet_CE_SDG_001_mom, train_loader, valid_loader, test_loader, loss_function = 'CrossEntropyLoss', optimizer = 'SGD', lr = 0.001, weight_decay = 0, momentum = 0.9, num_epochs=5, start_epoch=0, checkpoint_path='checkpoint_CE_SDG_001_mom.pth', result_path='efficientnet_result/result_CE_SDG_001_mom.pth')
+efficientnet_CE_SDG_001_mom, results_CE_SDG_001_mom = train_model(efficientnet_CE_SDG_001_mom, train_loader, valid_loader, test_loader, loss_function = 'CrossEntropyLoss', optimizer = 'SGD', lr = 0.001, weight_decay = 0, momentum = 0.9, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_CE_SDG_001_mom.pth', result_path='efficientnet_result/result_CE_SDG_001_mom.pth')
 
 # Create copy of efficientnet
 efficientnet_BCE_SGD_0001_mom = copy.deepcopy(model)
-efficientnet_BCE_SGD_0001_mom, results_BCE_SGD_0001_mom = train_dataset(efficientnet_BCE_SGD_0001_mom, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'SGD', lr = 0.0001, weight_decay = 0, momentum = 0.99, num_epochs=5, start_epoch=0, checkpoint_path='checkpoint_BCE_Adam_001_wd.pth', result_path='efficientnet_result/result_BCE_Adam_001_wd.pth')
+efficientnet_BCE_SGD_0001_mom, results_BCE_SGD_0001_mom = train_model(efficientnet_BCE_SGD_0001_mom, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'SGD', lr = 0.0001, weight_decay = 0, momentum = 0.99, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_BCE_Adam_001_wd.pth', result_path='efficientnet_result/result_BCE_Adam_001_wd.pth')
