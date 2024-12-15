@@ -31,7 +31,7 @@ Copyright (c) 2019, The MathWorks, Inc.
 
 ## EfficientNet Licensing
 
-This project uses the **EfficientNet model**, which is licensed under the [Apache License 2.0](LICENSE-Apache-License-2.0.txt) by:
+This project uses the **EfficientNet model**, which is licensed under the [Apache License 2.0](LICENSE-Apache-License-Version-2.0.txt) by:
 
 - **The TensorFlow Authors**
 - **Pavel Yakubovskiy**
