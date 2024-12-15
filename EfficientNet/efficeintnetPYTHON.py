@@ -1,3 +1,8 @@
+# This script uses the EfficientNet model provided by The TensorFlow Authors and Pavel Yakubovskiy.
+# Licensed under the Apache License 2.0. See LICENSE-Apache-License-Version-2.0.txt for details.
+#
+# Copyright (c) 2019 The TensorFlow Authors, Pavel Yakubovskiy.
+
 import pandas as pd
 import os
 import numpy as np
