@@ -20,3 +20,22 @@ This repository contains our group's final project in the *Fundamentals of Data 
 ### Grad-CAM images links
 * **CustomCNN Grad-CAM images**: https://drive.google.com/drive/folders/1m_nPV8dCLw2I0ioUPVHf7lzj9DgO1nQC
 * **ResNet-50 Grad-CAM images**: https://drive.google.com/drive/folders/112aDaR8khSr4Rap0nvNGOEl_pn2nGRKG
+
+## ResNet-50 Licensing
+This project uses the **ResNet-50 model** provided by **The MathWorks, Inc.** under the following license:
+
+[BSD 3-Clause "New" or "Revised" License](LICENSE-BSD-3-Clause.txt)
+
+### Copyright Notice
+Copyright (c) 2019, The MathWorks, Inc.
+
+## EfficientNet Licensing
+
+This project uses the **EfficientNet model**, which is licensed under the [Apache License 2.0](LICENSE-Apache-License-2.0.txt) by:
+
+- **The TensorFlow Authors**
+- **Pavel Yakubovskiy**
+
+### Copyright Notice
+
+Copyright © 2019 The TensorFlow Authors, Pavel Yakubovskiy.
