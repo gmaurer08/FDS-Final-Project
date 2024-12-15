@@ -2,14 +2,14 @@
 
 This repository contains our group's final project in the *Fundamentals of Data Science and Laboratory* course for the master's degree in Data Science at Sapienza (2024/2025).
 
-## Group Members
+### Group Members
 -  Nefeli Apostolou, 2168240
 - Zaineb Ojayyan, 2182087
 - Géraldine Valérie Maurer, 1996887
 - Angelina Kholopova, 2168055
 - Johanna Eklundh, 2183564
 
-### Project Steps
+## Project Steps
 - **Baseline**: logistic regression 
 - **Advanced**: CNN with custom architecture
 - **Benchmark Model 1**: ResNet-50
@@ -21,7 +21,9 @@ This repository contains our group's final project in the *Fundamentals of Data 
 * **CustomCNN Grad-CAM images**: https://drive.google.com/drive/folders/1m_nPV8dCLw2I0ioUPVHf7lzj9DgO1nQC
 * **ResNet-50 Grad-CAM images**: https://drive.google.com/drive/folders/112aDaR8khSr4Rap0nvNGOEl_pn2nGRKG
 
-## ResNet-50 Licensing
+## Licensing
+
+### ResNet-50
 This project uses the **ResNet-50 model** provided by **The MathWorks, Inc.** under the following license:
 
 [BSD 3-Clause "New" or "Revised" License](LICENSE-BSD-3-Clause.txt)
@@ -29,7 +31,7 @@ This project uses the **ResNet-50 model** provided by **The MathWorks, Inc.** un
 ### Copyright Notice
 Copyright (c) 2019, The MathWorks, Inc.
 
-## EfficientNet Licensing
+### EfficientNet
 
 This project uses the **EfficientNet model**, which is licensed under the [Apache License 2.0](LICENSE-Apache-License-Version-2.0.txt) by:
 
