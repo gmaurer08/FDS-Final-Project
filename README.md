@@ -26,3 +26,7 @@ This repository contains our group's final project in the *Fundamentals of Data 
 - Test robustness to data augmentation (if time permits)
 - Provide explainable results with Grad-CAM
 - Compare accuracy and computational complexity of all models
+
+### Grad-CAM images links
+* **CustomCNN Grad-CAM images**: https://drive.google.com/drive/folders/1m_nPV8dCLw2I0ioUPVHf7lzj9DgO1nQC
+* **ResNet-50 Grad-CAM images**: https://drive.google.com/drive/folders/112aDaR8khSr4Rap0nvNGOEl_pn2nGRKG
