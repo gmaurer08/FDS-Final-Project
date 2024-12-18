@@ -763,26 +763,26 @@ def results ():
 def gradcam_and_testing():
     print('length ', len(test_loader))
 
-    # BCE_Adam_001
-    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_001.pth"  # Path to your saved model
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    model.to(device)
-    efficientnet_BCE_Adam_001 = copy.deepcopy(model)
+    # # BCE_Adam_001
+    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_001.pth"  # Path to your saved model
+    # checkpoint = torch.load(checkpoint_path, map_location=device)
+    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    # model.to(device)
+    # efficientnet_BCE_Adam_001 = copy.deepcopy(model)
 
-    # CE_Adam_01 
-    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_Adam_01.pth"  # Path to your saved model
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    model.to(device)
-    efficientnet_CE_Adam_01  = copy.deepcopy(model)
+    # # CE_Adam_01 
+    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_Adam_01.pth"  # Path to your saved model
+    # checkpoint = torch.load(checkpoint_path, map_location=device)
+    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    # model.to(device)
+    # efficientnet_CE_Adam_01  = copy.deepcopy(model)
 
-    # BCE_SGD_001
-    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_001.pth"  # Path to your saved model
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    model.to(device)
-    efficientnet_BCE_SGD_001 = copy.deepcopy(model)
+    # # BCE_SGD_001
+    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_001.pth"  # Path to your saved model
+    # checkpoint = torch.load(checkpoint_path, map_location=device)
+    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    # model.to(device)
+    # efficientnet_BCE_SGD_001 = copy.deepcopy(model)
 
     # BCE_Adam_01
     checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_01.pth"  # Path to your saved model
@@ -791,19 +791,19 @@ def gradcam_and_testing():
     model.to(device)
     efficientnet_BCE_Adam_01 = copy.deepcopy(model)
 
-    # CE_SGD_001_mom
-    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_SGD_001_mom.pth"  # Path to your saved model
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    model.to(device)
-    efficientnet_CE_SGD_001_mom = copy.deepcopy(model)
+    # # CE_SGD_001_mom
+    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_SGD_001_mom.pth"  # Path to your saved model
+    # checkpoint = torch.load(checkpoint_path, map_location=device)
+    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    # model.to(device)
+    # efficientnet_CE_SGD_001_mom = copy.deepcopy(model)
     
-    # BCE_SGD_0001_mom 
-    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_0001_mom.pth"  # Path to your saved model
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    model.to(device)
-    efficientnet_BCE_SGD_0001_mom = copy.deepcopy(model)
+    # # BCE_SGD_0001_mom 
+    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_0001_mom.pth"  # Path to your saved model
+    # checkpoint = torch.load(checkpoint_path, map_location=device)
+    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    # model.to(device)
+    # efficientnet_BCE_SGD_0001_mom = copy.deepcopy(model)
 
     ### GradCam ###
     # get_grad_cam_images(efficientnet_BCE_Adam_001, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
@@ -828,29 +828,29 @@ def gradcam_and_testing():
     # print('BCE_SGD_001')
     # test_result_BCE_Adam_01 = test_model(efficientnet_BCE_Adam_01, test_loader)
     # print('BCE_Adam_01')
-    test_result_CE_SGD_001_mom = test_model(efficientnet_CE_SGD_001_mom, test_loader)
-    print('CE_SGD_001_mom')
-    test_result_BCE_SGD_0001_mom = test_model(efficientnet_BCE_SGD_0001_mom, test_loader)
-    print('BCE_SGD_0001_mom')
+    # test_result_CE_SGD_001_mom = test_model(efficientnet_CE_SGD_001_mom, test_loader)
+    # print('CE_SGD_001_mom')
+    # test_result_BCE_SGD_0001_mom = test_model(efficientnet_BCE_SGD_0001_mom, test_loader)
+    # print('BCE_SGD_0001_mom')
 
-    ### Save GRADCAM with all different options ###
+    ## Save GRADCAM with all different options ###
     # Filter images
-    # filtered_images = filter_images_by_case(efficientnet_BCE_Adam_01, test_loader, device)
+    filtered_images = filter_images_by_case(efficientnet_BCE_Adam_01, test_loader, device)
 
-    # # Prepare lists of image tensors (convert tensors to PIL images)
-    # to_pil = transforms.ToPILImage()
-    # real_images = [to_pil(img) for img in filtered_images[(1, 1)]]  # True label = 1, pred = 1
-    # fake_images = [to_pil(img) for img in filtered_images[(0, 0)]]  # True label = 0, pred = 0
+    # Prepare lists of image tensors (convert tensors to PIL images)
+    to_pil = transforms.ToPILImage()
+    real_images = [to_pil(img) for img in filtered_images[(1, 1)]]  # True label = 1, pred = 1
+    fake_images = [to_pil(img) for img in filtered_images[(0, 0)]]  # True label = 0, pred = 0
 
-    # # Other cases
-    # wrong_real_images = [to_pil(img) for img in filtered_images[(0, 1)]]  # True label = 1, pred = 0
-    # wrong_fake_images = [to_pil(img) for img in filtered_images[(1, 0)]]  # True label = 0, pred = 1
+    # Other cases
+    wrong_real_images = [to_pil(img) for img in filtered_images[(0, 1)]]  # True label = 1, pred = 0
+    wrong_fake_images = [to_pil(img) for img in filtered_images[(1, 0)]]  # True label = 0, pred = 1
 
-    # output_path_correct = "EfficientNet/gradcam_output/gradcam_Correct_real_BCE_Adam_01.png" # Path to save Grad-CAM output
-    # output_path_wrong = "EfficientNet/gradcam_output/gradcam_Wrong_BCE_Adam_01.png" # Path to save Grad-CAM output
+    output_path_correct = "EfficientNet/gradcam_output/gradcam_Correct_real_BCE_Adam_01.png" # Path to save Grad-CAM output
+    output_path_wrong = "EfficientNet/gradcam_output/gradcam_Wrong_BCE_Adam_01.png" # Path to save Grad-CAM output
 
-    # # Call your existing function with filtered lists
-    # get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, real_images, fake_images, output_path_correct)
+    # Call your existing function with filtered lists
+    get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, real_images, fake_images, output_path_correct)
     # get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, wrong_real_images, wrong_fake_images, output_path_wrong)
 
 def filter_images_by_case(model, dataloader, device):
@@ -884,7 +884,7 @@ def filter_images_by_case(model, dataloader, device):
                 case = (preds[i].item(), labels[i].item())
                 if case in filtered_images and len(filtered_images[case]) < 2:  # Limit to 2 images per case
                     filtered_images[case].append(images[i].cpu())  # Save the image tensor
-
+                    print('saved')
             # Stop early if all cases have 2 images
             if all(len(v) >= 2 for v in filtered_images.values()):
                 break
