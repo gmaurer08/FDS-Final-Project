@@ -118,6 +118,7 @@ class FaceDataset(Dataset):
         return len(self.dataframe)  # Return the length of the dataframe
 
     def __getitem__(self, idx):
+    
         # Get the image path and label from the dataframe
         img_path = self.dataframe.iloc[idx].image_path
         label = int(self.dataframe.iloc[idx].label)  # Label is 0 or 1 (fake or real)
@@ -129,7 +130,7 @@ class FaceDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return image, label  # Return image and label
+        return image, label, img_path # Return image and label
 
 # Load pre-trained EfficientNet-B0 (It is possible to change to B1, B2, etc., if desired) 
 # B0 is the smallest and fastest, while B7 is the largest and most accurate.
@@ -155,7 +156,7 @@ test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 # Check the first batch of data
 data_iter = iter(train_loader)
-images, labels = next(data_iter)
+images, labels, img_path = next(data_iter)
 print('Batch Shape:')
 print(images.shape)  # Should print (batch_size, 3, 224, 224)
 print('\nNumber of Labels:')
@@ -492,36 +493,56 @@ def get_grad_cam_images(model, transform, real_images, fake_images, path):
     Returns:
     - None
     '''
-    #Function to get last convolutional layer
     def get_last_conv_layer(model):
-        print('got last layer')
-        for name, module in model.named_modules():
+        """Retrieve the last convolutional layer for Grad-CAM."""
+        for name, module in reversed(list(model.named_modules())):
             if isinstance(module, torch.nn.Conv2d):
-                last_conv_layer = module
-        return last_conv_layer
-    
-    # Find the last convolutional layer
-    target_layer = get_last_conv_layer(model)
-    # Set the model to evaluation mode
-    model.eval()
+                print(f"Using {name} as the target layer.")  # Debugging: Ensure correct layer is selected
+                return module
+        raise ValueError("No Conv2d layer found in the model.")
 
+    target_layer = get_last_conv_layer(model)
+    # Define target layer
+    #Set the model to evaluation mode
+    model.eval()
+    for param in model.parameters():
+        param.requires_grad = True
     # Initialize Grad-CAM
     cam = GradCAM(model=model, target_layers=[target_layer])
 
+    target_layer.register_forward_hook(lambda module, input, output: output.retain_grad())
+
+
     # Function to process an image and generate Grad-CAM heatmap
     def generate_gradcam_overlay(img_path, target_class):
-        # Load and preprocess the image
-        #print(f"Image path: {img_path}")
-        #image = Image.open(img_path).convert('RGB')
-        print('in overlay')
-        img_tensor = transform(img_path).unsqueeze(0).to(device)  # Add batch dimension and move to device
+        
+        image = Image.open(img_path).convert('RGB')
+        img_tensor = transform(image).unsqueeze(0).to(device)  # Add batch dimension and move to device
 
         # Convert the image to a NumPy array for visualization
-        img_for_visualization = np.array(img_path.resize((224, 224))) / 255.0  # Scale to [0, 1]
+        img_for_visualization = np.array(image.resize((224, 224))) / 255.0  # Scale to [0, 1]
+        with torch.enable_grad():
+            # Generate Grad-CAM heatmap
+            output = model(img_tensor)
+            target = torch.zeros_like(output)
+            target[0, target_class] = 1  # One-hot encode the target class
+            output.backward(gradient=target)
+            print("Target class:", target_class)
+            # print("Output shape:", output.shape)
 
-        # Generate Grad-CAM heatmap
-        img_tensor = img_tensor.requires_grad_(True)
-        grayscale_cam = cam(input_tensor=img_tensor, targets=[ClassifierOutputTarget(target_class)])
+            target_layer.register_forward_hook(
+                lambda module, input, output: output.requires_grad_()
+            )
+
+            try: #document
+                grayscale_cam = cam(input_tensor=img_tensor, targets=[ClassifierOutputTarget(target_class)])
+                print("Grad-CAM computed successfully.")
+
+            except Exception as e:
+                raise RuntimeError(f"Error during Grad-CAM computation: {e}")
+    
+        if grayscale_cam is None:
+            raise RuntimeError("Grad-CAM returned None.")
         heatmap = grayscale_cam[0, :]  # Extract the heatmap
 
         # Overlay heatmap on the image
@@ -529,7 +550,7 @@ def get_grad_cam_images(model, transform, real_images, fake_images, path):
 
         # Get model prediction
         with torch.no_grad():
-            output = model(img_tensor)
+            # output = model(img_tensor)
             pred_class = output.argmax(dim=1).item()
 
         return superimposed_img, pred_class
@@ -544,7 +565,6 @@ def get_grad_cam_images(model, transform, real_images, fake_images, path):
         axes[0, i].imshow(superimposed_img)
         axes[0, i].set_title(f"Real Image {i+1}\nPred: {pred_class}, Actual: {target_class}")
         axes[0, i].axis("off")
-        print('first row')
 
     # Second row: Fake images
     for i, img_path in enumerate(fake_images):
@@ -553,15 +573,11 @@ def get_grad_cam_images(model, transform, real_images, fake_images, path):
         axes[1, i].imshow(superimposed_img)
         axes[1, i].set_title(f"Fake Image {i+1}\nPred: {pred_class}, Actual: {target_class}")
         axes[1, i].axis("off")
-        print('second row')
 
     plt.tight_layout()
-
-    # Ensure directory exists before saving
-    os.makedirs(os.path.dirname(path), exist_ok=True)
     plt.savefig(path)
     plt.show()
-    
+
 def plot_figures(results, path, num_epochs):
     '''
     Function that, given training, validation and test results, plots and saves images
@@ -784,19 +800,19 @@ def gradcam_and_testing():
     # model.to(device)
     # efficientnet_BCE_SGD_001 = copy.deepcopy(model)
 
-    # BCE_Adam_01
-    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_01.pth"  # Path to your saved model
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    model.to(device)
-    efficientnet_BCE_Adam_01 = copy.deepcopy(model)
-
-    # # CE_SGD_001_mom
-    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_SGD_001_mom.pth"  # Path to your saved model
+    # # BCE_Adam_01
+    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_01.pth"  # Path to your saved model
     # checkpoint = torch.load(checkpoint_path, map_location=device)
     # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
     # model.to(device)
-    # efficientnet_CE_SGD_001_mom = copy.deepcopy(model)
+    # efficientnet_BCE_Adam_01 = copy.deepcopy(model)
+
+    # CE_SGD_001_mom
+    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_SGD_001_mom.pth"  # Path to your saved model
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    model.to(device)
+    efficientnet_CE_SGD_001_mom = copy.deepcopy(model)
     
     # # BCE_SGD_0001_mom 
     # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_0001_mom.pth"  # Path to your saved model
@@ -810,8 +826,8 @@ def gradcam_and_testing():
     # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_Adam_001.png" # Path to save Grad-CAM output
     # get_grad_cam_images(efficientnet_BCE_SGD_0001_mom, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
     # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_SGD_0001_mom.png" # Path to save Grad-CAM output
+    # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_Adam_01NEW_TEST.png" # Path to save Grad-CAM output
     # get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
-    # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_Adam_01.png" # Path to save Grad-CAM output
     # get_grad_cam_images(efficientnet_BCE_SGD_001, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
     # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_SGD_001.png" # Path to save Grad-CAM output
     # get_grad_cam_images(efficientnet_CE_Adam_01 , efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
@@ -835,65 +851,58 @@ def gradcam_and_testing():
 
     ## Save GRADCAM with all different options ###
     # Filter images
-    filtered_images = filter_images_by_case(efficientnet_BCE_Adam_01, test_loader, device)
+    # Assuming dataloader is created from a DataFrame-based dataset
+    case_00_paths, case_11_paths = filter_image_paths_by_case(efficientnet_CE_SGD_001_mom, test_loader, device)
 
-    # Prepare lists of image tensors (convert tensors to PIL images)
-    to_pil = transforms.ToPILImage()
-    real_images = [to_pil(img) for img in filtered_images[(1, 1)]]  # True label = 1, pred = 1
-    fake_images = [to_pil(img) for img in filtered_images[(0, 0)]]  # True label = 0, pred = 0
+    # Define output paths
+    output_path_correct = "EfficientNet/gradcam_output/gradcam_Correct_CE_SGD_001_mom.png"
 
-    # Other cases
-    wrong_real_images = [to_pil(img) for img in filtered_images[(0, 1)]]  # True label = 1, pred = 0
-    wrong_fake_images = [to_pil(img) for img in filtered_images[(1, 0)]]  # True label = 0, pred = 1
+    ### Grad-CAM Visualization ###
+    # Correct cases (real_images and fake_images)
+    get_grad_cam_images(efficientnet_CE_SGD_001_mom, efficientnet_transform, case_11_paths, case_00_paths, output_path_correct)
 
-    output_path_correct = "EfficientNet/gradcam_output/gradcam_Correct_real_BCE_Adam_01.png" # Path to save Grad-CAM output
-    output_path_wrong = "EfficientNet/gradcam_output/gradcam_Wrong_BCE_Adam_01.png" # Path to save Grad-CAM output
-
-    # Call your existing function with filtered lists
-    get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, real_images, fake_images, output_path_correct)
-    # get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, wrong_real_images, wrong_fake_images, output_path_wrong)
-
-def filter_images_by_case(model, dataloader, device):
+def filter_image_paths_by_case(model, dataloader, device):
     """
-    Filters images into four lists based on prediction and true label combinations.
-    
-    Args:
-    - model (nn.Module): Trained model
-    - dataloader (DataLoader): DataLoader for test data
-    - device (str): Device ('cuda' or 'cpu')
-    
-    Returns:
-    - dict: Dictionary containing images for each case
+    Filters image paths into four lists based on prediction and true label combinations.
+    Returns exactly 2 image paths per case: (0,0), (1,1).
     """
     model.eval()
-    filtered_images = {
-        (0, 0): [],  # Prediction 0, True 0
-        (0, 1): [],  # Prediction 0, True 1
-        (1, 1): [],  # Prediction 1, True 1
-        (1, 0): []   # Prediction 1, True 0
-    }
+    
+    # Initialize lists for each case
+    case_00_paths = []  # Pred = 0, Label = 0
+    case_11_paths = []  # Pred = 1, Label = 1
 
-    # Loop through dataloader
     with torch.no_grad():
-        for images, labels in dataloader:
+        for batch in dataloader:
+            # Assuming dataloader returns (images, labels, paths)
+            images, labels, paths = batch
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
             preds = torch.argmax(outputs, dim=1)
 
             for i in range(len(images)):
-                case = (preds[i].item(), labels[i].item())
-                if case in filtered_images and len(filtered_images[case]) < 2:  # Limit to 2 images per case
-                    filtered_images[case].append(images[i].cpu())  # Save the image tensor
-                    print('saved')
-            # Stop early if all cases have 2 images
-            if all(len(v) >= 2 for v in filtered_images.values()):
+                pred_label = preds[i].item()
+                true_label = labels[i].item()
+                img_path = paths[i]  # Get the image path
+
+                # Correctly predicted fake (0,0)
+                if pred_label == 0 and true_label == 0 and len(case_00_paths) < 4:
+                    case_00_paths.append(img_path)
+                    print(f"Saved path to case_00 (Pred=0, True=0): {img_path}")
+
+                # Correctly predicted real (1,1)
+                elif pred_label == 1 and true_label == 1 and len(case_11_paths) < 4:
+                    case_11_paths.append(img_path)
+                    print(f"Saved path to case_11 (Pred=1, True=1): {img_path}")
+
+            # Stop early if all cases have 2 image paths
+            if len(case_00_paths) >= 4 and len(case_11_paths) >= 4:
                 break
 
-        print('finished filtering')
-    return filtered_images
-
+    print('Finished filtering image paths.')
+    return case_00_paths, case_11_paths
 
 # run_experiment()
 # results()
-# gradcam_and_testing()
+gradcam_and_testing()
 # print_results_terminal()
