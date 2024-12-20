@@ -500,9 +500,16 @@ def get_grad_cam_images(model, transform, real_images, fake_images, path):
                 print(f"Using {name} as the target layer.")  # Debugging: Ensure correct layer is selected
                 return module
         raise ValueError("No Conv2d layer found in the model.")
+    # target_layer = get_last_conv_layer(model)
 
-    target_layer = get_last_conv_layer(model)
-    # Define target layer
+    # Retrieve the last trainable Conv2d layer
+    # print (model)
+    # # Identify trainable parameters
+    # for name, param in model.named_parameters():
+    #     if param.requires_grad:
+    #         print(f"Trainable layer: {name}")
+    target_layer = model.features[0][0] 
+
     #Set the model to evaluation mode
     model.eval()
     for param in model.parameters():
@@ -855,7 +862,7 @@ def gradcam_and_testing():
     case_00_paths, case_11_paths = filter_image_paths_by_case(efficientnet_CE_SGD_001_mom, test_loader, device)
 
     # Define output paths
-    output_path_correct = "EfficientNet/gradcam_output/gradcam_Correct_CE_SGD_001_mom.png"
+    output_path_correct = "EfficientNet/gradcam_output/gradcam_CE_SGD_001_mom_features[0][0].png"
 
     ### Grad-CAM Visualization ###
     # Correct cases (real_images and fake_images)
