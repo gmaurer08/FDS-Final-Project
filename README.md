@@ -43,3 +43,44 @@ This project uses the **EfficientNet model**, which is licensed under the [Apach
 ### Copyright Notice
 
 Copyright © 2019 The TensorFlow Authors, Pavel Yakubovskiy.
+
+### File Structure
+
+├── CustomCNN/
+│   ├── CustomCNN + ResNet50 results.csv
+│   ├── CustomCNN.ipynb
+│   ├── results_images/
+│   │   ├── CustomCNN/
+│   │   ├── CustomCNN2/
+├── Data_Augmentation_and_Grad_CAM.ipynb
+├── EfficientNet/
+│   ├── checkpoint.pth
+│   ├── checkpoints/
+│   ├── checkpoints_latest/
+│   ├── efficeintnet.py
+│   ├── efficientnet_result/
+│   ├── efficientnet_result_images/
+│   ├── efficientnet_result_latest/
+│   ├── gradcam_output/
+│   ├── training_results.csv
+├── Grad-CAM/
+│   ├── Grad-CAM-CustomCNN/
+│   │   ├── true-fake-pred-fake/
+│   │   ├── true-fake-pred-real/
+│   │   ├── true-real-pred-fake/
+│   │   ├── true-real-pred-real/
+│   ├── Grad-CAM-resnet50/
+│   │   ├── true-fake-pred-fake/
+│   │   ├── true-fake-pred-real/
+│   │   ├── true-real-pred-fake/
+│   │   ├── true-real-pred-real/
+├── LICENSE
+├── LICENSE-Apache-License-Version-2.0.txt
+├── LICENSE-BSD-3-Clause.txt
+├── LogisticRegression_SimpleCNN.ipynb
+├── README.md
+├── getStructure.py
+├── resnet50/
+│   ├── resnet50.ipynb
+│   ├── resnet50_results_images/
+├── test_dataset.ipynb
