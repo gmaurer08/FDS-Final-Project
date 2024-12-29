@@ -46,13 +46,13 @@ Copyright © 2019 The TensorFlow Authors, Pavel Yakubovskiy.
 
 ### File Structure
 
+```bash
 ├── CustomCNN/
 │   ├── CustomCNN + ResNet50 results.csv
 │   ├── CustomCNN.ipynb
 │   ├── results_images/
 │   │   ├── CustomCNN/
 │   │   ├── CustomCNN2/
-├── Data_Augmentation_and_Grad_CAM.ipynb
 ├── EfficientNet/
 │   ├── checkpoint.pth
 │   ├── checkpoints/
@@ -63,6 +63,11 @@ Copyright © 2019 The TensorFlow Authors, Pavel Yakubovskiy.
 │   ├── efficientnet_result_latest/
 │   ├── gradcam_output/
 │   ├── training_results.csv
+├── Tests and Data Augmentation/
+│   ├── Data_Augmentation_and_Grad_CAM.ipynb
+│   ├── test_dataset.ipynb
+│   ├── Testing_on_new_Images.ipynb
+│   ├── Testing_with filters.ipynb
 ├── Grad-CAM/
 │   ├── Grad-CAM-CustomCNN/
 │   │   ├── true-fake-pred-fake/
@@ -83,4 +88,4 @@ Copyright © 2019 The TensorFlow Authors, Pavel Yakubovskiy.
 ├── resnet50/
 │   ├── resnet50.ipynb
 │   ├── resnet50_results_images/
-├── test_dataset.ipynb
+```
