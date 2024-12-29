@@ -11,7 +11,6 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torch.nn.functional import softmax
-#from torchvision.transforms import InterpolationMode
 from torchvision import transforms, models
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 from torchvision.transforms.functional import to_pil_image
@@ -20,7 +19,6 @@ from PIL import Image
 import random
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-#rom sklearn.metrics import auc    Not used
 from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, classification_report
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
 from pytorch_grad_cam import GradCAM
@@ -31,7 +29,6 @@ import cv2
 from tabulate import tabulate
 import zipfile
 import copy
-#import torchvision.models as models
 print(torch.cuda.is_available())  # This will return True if a GPU is available.
 import pickle
 
@@ -101,9 +98,6 @@ for ax, img, title in zip(axes[1], fake_images, ["Fake Image 1", "Fake Image 2",
     ax.set_title(title)
     ax.axis("off")
 
-# plt.tight_layout()
-# plt.show()
-
 class FaceDataset(Dataset):
     def __init__(self, dataframe, transform=None):
         '''
@@ -112,7 +106,7 @@ class FaceDataset(Dataset):
             transform (callable, optional): Optional transform to be applied on a sample
         '''
         self.dataframe = dataframe  # Store the dataframe
-        self.transform = transform  # Store the transform (if present)
+        self.transform = transform  # Store the transform
 
     def __len__(self):
         return len(self.dataframe)  # Return the length of the dataframe
@@ -150,7 +144,7 @@ valid_dataset = FaceDataset(dataframe=valid_df, transform=efficientnet_transform
 test_dataset = FaceDataset(dataframe=test_df, transform=efficientnet_transform)
 
 # Create DataLoader instances for efficient batching and shuffling
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True) 
 valid_loader = DataLoader(valid_dataset, batch_size=64, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
@@ -160,7 +154,7 @@ images, labels, img_path = next(data_iter)
 print('Batch Shape:')
 print(images.shape)  # Should print (batch_size, 3, 224, 224)
 print('\nNumber of Labels:')
-print(labels.shape)  # Should print (batch_size,)
+print(labels.shape)  # Should print (batch_size=64)
 
 # Define the number of classes in your dataset
 NUM_CLASSES = 2  # Real vs Fake
@@ -175,10 +169,6 @@ def build_model(num_classes):
     # Freeze the pre-trained layers
     for param in model.features.parameters():
         param.requires_grad = False
-
-    # Ensure top layers are trainable
-    # for param in model.classifier.parameters():  # Adjust based on your model's architecture
-    #     param.requires_grad = True
 
     # Replace the classifier with a custom one
     model.classifier = nn.Sequential(
@@ -295,12 +285,10 @@ def train_model(model, train_loader, valid_loader, test_loader, loss_function, o
 
                 # Forward pass
                 outputs = model(images)
-                #loss = criterion(outputs, labels)
 
                 # Compute loss
                 if loss_function == 'BCEWithLogitsLoss':
-                    # convert labels to float and ensure single-channel output
-                    val_loss = criterion(outputs[:, 1], labels.float())
+                    val_loss = criterion(outputs[:, 1], labels.float()) # convert labels to float and ensure single-channel output 
                 elif loss_function == 'CrossEntropyLoss':
                     val_loss = criterion(outputs, labels)
                 
@@ -322,7 +310,7 @@ def train_model(model, train_loader, valid_loader, test_loader, loss_function, o
         val_losses.append(epoch_valid_loss)  # Save validation loss for this epoch
         val_accuracies.append(epoch_valid_acc)  # Save validation accuracy for this epoch
 
-        # Append results to the probs, true_labels, pred_labels lists
+        # Save results to the probs, true_labels, pred_labels lists
         probs.append(prob)
         true_labels.append(epoch_true_labels)
         pred_labels.append(epoch_pred_labels)
@@ -408,10 +396,6 @@ def train_model(model, train_loader, valid_loader, test_loader, loss_function, o
 
     print("Training results saved to ", result_path)
 
-    # # Save the DataFrame as a CSV file
-    # efficientnet_results.to_csv('training_results.csv', index=False)
-    # print("Training metrics saved to 'training_results.csv'.")
-
     return model, efficientnet_results
 
 def test_model(model, test_loader):
@@ -426,11 +410,7 @@ def test_model(model, test_loader):
     test_predictions, test_true_labels = [], []
     accuracy, precision, recall, f1, roc_auc = 0, 0, 0, 0, 0
     with torch.no_grad():
-        # i = 1
         for images, labels in test_loader:
-            # if (i%10 == 0):
-            #     print(i)
-            # i += 1
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs, 1)
@@ -463,9 +443,6 @@ def test_model(model, test_loader):
         'confusion_matrix': test_conf_matrix,
     }
 
-# training_results_path = 'training_results.csv'  # Ensure the file path is correct
-# training_results = pd.read_csv(training_results_path)
-
 def print_result (results):
 
     train_accuracies = results['train_accuracies']
@@ -476,8 +453,6 @@ def print_result (results):
 
     train_accuracies_last = train_accuracies[4]
     val_accuracies_last= val_accuracies[4]
-    # Convert DataFrame to a pretty table
-    #print(tabulate(results, headers='keys', tablefmt='pretty'))
     print('Train Accuracy: ', train_accuracies_last, '\nValid Accuracy: ', val_accuracies_last, '\nRecall: ', recall, '\nF1: ', f1, '\nRoc: ', roc)
 
 def get_grad_cam_images(model, transform, real_images, fake_images, path):
@@ -496,29 +471,21 @@ def get_grad_cam_images(model, transform, real_images, fake_images, path):
     def get_last_conv_layer(model):
         """Retrieve the last convolutional layer for Grad-CAM."""
         for name, module in reversed(list(model.named_modules())):
-            if isinstance(module, torch.nn.Conv2d):
-                print(f"Using {name} as the target layer.")  # Debugging: Ensure correct layer is selected
+            if isinstance(module, torch.nn.Conv2d)
                 return module
         raise ValueError("No Conv2d layer found in the model.")
-    # target_layer = get_last_conv_layer(model)
-
-    # Retrieve the last trainable Conv2d layer
-    # print (model)
-    # # Identify trainable parameters
-    # for name, param in model.named_parameters():
-    #     if param.requires_grad:
-    #         print(f"Trainable layer: {name}")
+   
     target_layer = model.features[0][0] 
 
     #Set the model to evaluation mode
     model.eval()
     for param in model.parameters():
-        param.requires_grad = True
+        param.requires_grad = true
+
     # Initialize Grad-CAM
     cam = GradCAM(model=model, target_layers=[target_layer])
 
     target_layer.register_forward_hook(lambda module, input, output: output.retain_grad())
-
 
     # Function to process an image and generate Grad-CAM heatmap
     def generate_gradcam_overlay(img_path, target_class):
@@ -534,14 +501,12 @@ def get_grad_cam_images(model, transform, real_images, fake_images, path):
             target = torch.zeros_like(output)
             target[0, target_class] = 1  # One-hot encode the target class
             output.backward(gradient=target)
-            print("Target class:", target_class)
-            # print("Output shape:", output.shape)
 
             target_layer.register_forward_hook(
                 lambda module, input, output: output.requires_grad_()
             )
 
-            try: #document
+            try:
                 grayscale_cam = cam(input_tensor=img_tensor, targets=[ClassifierOutputTarget(target_class)])
                 print("Grad-CAM computed successfully.")
 
@@ -671,7 +636,7 @@ def plot_figures(results, path, num_epochs):
     #plt.show()
     plt.close()
     
-# To conitune training
+## To conitune training ##
 # #Load previous epochs (training)
 # checkpoint = torch.load('checkpoint.pth')
 # model.load_state_dict(checkpoint['model_state_dict'])
@@ -679,16 +644,12 @@ def plot_figures(results, path, num_epochs):
 # #start_epoch = checkpoint['epoch'] + 1  # This should be 1 for the second epoch
 # print("Starting training from epoch:", start_epoch)
 
-# Restarting the training
+## Restarting the training ##
 # Start fresh: Reset model weights and optimizer state
 # model.apply(lambda module: module.reset_parameters() if hasattr(module, 'reset_parameters') else None)  # Reset model weights
 # #optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # Reinitialize optimizer
 # start_epoch = 0 # Ensure we start from epoch 0
 # print("Starting training from epoch:", start_epoch)
-
-# Train the model
-#train_result = train_model(model, train_loader, valid_loader, num_epochs=3, start_epoch=start_epoch, checkpoint_path='checkpoint.pth')
-#display(train_result)
 
 os.makedirs('Efficientnet/checkpoints', exist_ok=True)
 os.makedirs('Efficientnet/efficientnet_result', exist_ok=True)
@@ -709,10 +670,6 @@ def run_experiment ():
     # Create copy of efficientnet   DOESNT EXIST IN RESNET50
     efficientnet_BCE_Adam_01 = copy.deepcopy(model)
     efficientne_BCE_Adam_01, results_BCE_Adam_01 = train_model(efficientnet_BCE_Adam_01, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'Adam', lr = 0.001, weight_decay = 0, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_BCE_Adam_01.pth', result_path='efficientnet_result/result_BCE_Adam_01.pth')
-
-    # Create copy of efficientnet  !!!!!!!!! DOESNT EXIST ANYMORE  !!!!!!!!!!
-    efficientnet_BCE_Adam_001_wd = copy.deepcopy(model)
-    efficientnet_BCE_Adam_001_wd, results_BCE_Adam_001_wd = train_model(efficientnet_BCE_Adam_001_wd, train_loader, valid_loader, test_loader, loss_function = 'BCEWithLogitsLoss', optimizer = 'Adam', lr = 0.001, weight_decay = 0.001, momentum = 0, num_epochs=5, start_epoch=0, checkpoint_path='checkpoints/checkpoint_BCE_Adam_001_wd.pth', result_path='efficientnet_result/result_BCE_Adam_001_wd.pth')
 
     # Create copy of efficientnet
     efficientnet_CE_SDG_001_mom = copy.deepcopy(model)
@@ -786,33 +743,33 @@ def results ():
 def gradcam_and_testing():
     print('length ', len(test_loader))
 
-    # # BCE_Adam_001
-    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_001.pth"  # Path to your saved model
-    # checkpoint = torch.load(checkpoint_path, map_location=device)
-    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    # model.to(device)
-    # efficientnet_BCE_Adam_001 = copy.deepcopy(model)
+    # BCE_Adam_001
+    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_001.pth"  # Path to your saved model
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    model.to(device)
+    efficientnet_BCE_Adam_001 = copy.deepcopy(model)
 
-    # # CE_Adam_01 
-    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_Adam_01.pth"  # Path to your saved model
-    # checkpoint = torch.load(checkpoint_path, map_location=device)
-    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    # model.to(device)
-    # efficientnet_CE_Adam_01  = copy.deepcopy(model)
+    # CE_Adam_01 
+    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_Adam_01.pth"  # Path to your saved model
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    model.to(device)
+    efficientnet_CE_Adam_01  = copy.deepcopy(model)
 
-    # # BCE_SGD_001
-    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_001.pth"  # Path to your saved model
-    # checkpoint = torch.load(checkpoint_path, map_location=device)
-    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    # model.to(device)
-    # efficientnet_BCE_SGD_001 = copy.deepcopy(model)
+    # BCE_SGD_001
+    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_001.pth"  # Path to your saved model
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    model.to(device)
+    efficientnet_BCE_SGD_001 = copy.deepcopy(model)
 
-    # # BCE_Adam_01
-    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_01.pth"  # Path to your saved model
-    # checkpoint = torch.load(checkpoint_path, map_location=device)
-    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    # model.to(device)
-    # efficientnet_BCE_Adam_01 = copy.deepcopy(model)
+    # BCE_Adam_01
+    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_Adam_01.pth"  # Path to your saved model
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    model.to(device)
+    efficientnet_BCE_Adam_01 = copy.deepcopy(model)
 
     # CE_SGD_001_mom
     checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_CE_SGD_001_mom.pth"  # Path to your saved model
@@ -821,40 +778,40 @@ def gradcam_and_testing():
     model.to(device)
     efficientnet_CE_SGD_001_mom = copy.deepcopy(model)
     
-    # # BCE_SGD_0001_mom 
-    # checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_0001_mom.pth"  # Path to your saved model
-    # checkpoint = torch.load(checkpoint_path, map_location=device)
-    # model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
-    # model.to(device)
-    # efficientnet_BCE_SGD_0001_mom = copy.deepcopy(model)
+    # BCE_SGD_0001_mom 
+    checkpoint_path = "EfficientNet/checkpoints_latest/checkpoint_BCE_SGD_0001_mom.pth"  # Path to your saved model
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict']) # Load model weights
+    model.to(device)
+    efficientnet_BCE_SGD_0001_mom = copy.deepcopy(model)
 
-    ### GradCam ###
-    # get_grad_cam_images(efficientnet_BCE_Adam_001, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
-    # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_Adam_001.png" # Path to save Grad-CAM output
-    # get_grad_cam_images(efficientnet_BCE_SGD_0001_mom, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
-    # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_SGD_0001_mom.png" # Path to save Grad-CAM output
-    # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_Adam_01NEW_TEST.png" # Path to save Grad-CAM output
-    # get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
-    # get_grad_cam_images(efficientnet_BCE_SGD_001, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
-    # output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_SGD_001.png" # Path to save Grad-CAM output
-    # get_grad_cam_images(efficientnet_CE_Adam_01 , efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
-    # output_path = "EfficientNet/gradcam_output/gradcam_results_CE_Adam_01.png" # Path to save Grad-CAM output
-    # get_grad_cam_images(efficientnet_CE_SGD_001_mom, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
-    # output_path = "EfficientNet/gradcam_output/gradcam_results_CE_SDG_001_mom.png" # Path to save Grad-CAM output
+    ## GradCam ###
+    get_grad_cam_images(efficientnet_BCE_Adam_001, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
+    output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_Adam_001.png" # Path to save Grad-CAM output
+    get_grad_cam_images(efficientnet_BCE_SGD_0001_mom, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
+    output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_SGD_0001_mom.png" # Path to save Grad-CAM output
+    output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_Adam_01NEW_TEST.png" # Path to save Grad-CAM output
+    get_grad_cam_images(efficientnet_BCE_Adam_01, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
+    get_grad_cam_images(efficientnet_BCE_SGD_001, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
+    output_path = "EfficientNet/gradcam_output/gradcam_results_BCE_SGD_001.png" # Path to save Grad-CAM output
+    get_grad_cam_images(efficientnet_CE_Adam_01 , efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
+    output_path = "EfficientNet/gradcam_output/gradcam_results_CE_Adam_01.png" # Path to save Grad-CAM output
+    get_grad_cam_images(efficientnet_CE_SGD_001_mom, efficientnet_transform, real_images, fake_images, output_path) # Generate Grad-CAM results
+    output_path = "EfficientNet/gradcam_output/gradcam_results_CE_SDG_001_mom.png" # Path to save Grad-CAM output
     
-    ### Testing ###
-    # test_result_BCE_Adam_001 = test_model(efficientnet_BCE_Adam_001, test_loader)
-    # print('BCE_Adam_001: ')
-    # test_result_CE_Adam_01 = test_model(efficientnet_CE_Adam_01, test_loader)
-    # print('CE_Adam_01')
-    # test_result_BCE_SGD_001 = test_model(efficientnet_BCE_SGD_001, test_loader)
-    # print('BCE_SGD_001')
-    # test_result_BCE_Adam_01 = test_model(efficientnet_BCE_Adam_01, test_loader)
-    # print('BCE_Adam_01')
-    # test_result_CE_SGD_001_mom = test_model(efficientnet_CE_SGD_001_mom, test_loader)
-    # print('CE_SGD_001_mom')
-    # test_result_BCE_SGD_0001_mom = test_model(efficientnet_BCE_SGD_0001_mom, test_loader)
-    # print('BCE_SGD_0001_mom')
+    ## Testing ###
+    test_result_BCE_Adam_001 = test_model(efficientnet_BCE_Adam_001, test_loader)
+    print('BCE_Adam_001: ')
+    test_result_CE_Adam_01 = test_model(efficientnet_CE_Adam_01, test_loader)
+    print('CE_Adam_01')
+    test_result_BCE_SGD_001 = test_model(efficientnet_BCE_SGD_001, test_loader)
+    print('BCE_SGD_001')
+    test_result_BCE_Adam_01 = test_model(efficientnet_BCE_Adam_01, test_loader)
+    print('BCE_Adam_01')
+    test_result_CE_SGD_001_mom = test_model(efficientnet_CE_SGD_001_mom, test_loader)
+    print('CE_SGD_001_mom')
+    test_result_BCE_SGD_0001_mom = test_model(efficientnet_BCE_SGD_0001_mom, test_loader)
+    print('BCE_SGD_0001_mom')
 
     ## Save GRADCAM with all different options ###
     # Filter images
